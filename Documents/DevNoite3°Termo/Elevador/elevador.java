@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+// Classe principal que representa a janela do sistema de elevadores
 public class Elevador extends JFrame {
     private JButton[] botoesChamar;
     private JButton[] botoesAndar;
@@ -15,9 +16,11 @@ public class Elevador extends JFrame {
     private int[] direcaoElevadores;
     private int elevadorSelecionado;
 
+    // Construtor da classe Elevador
     public Elevador() {
         super("Sistema de Elevadores");
 
+        // Inicialização de variáveis
         botoesChamar = new JButton[2];
         botoesAndar = new JButton[6];
         display = new JTextArea();
@@ -30,6 +33,7 @@ public class Elevador extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // Botões para selecionar o elevador
         btnSelecionarElevador1 = new JButton("Selecionar Elevador 1");
         btnSelecionarElevador1.addActionListener(new ActionListener() {
             @Override
@@ -48,12 +52,14 @@ public class Elevador extends JFrame {
             }
         });
 
+        // Painel para os botões de seleção de elevador
         JPanel botoesSelecionarPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         botoesSelecionarPanel.add(btnSelecionarElevador1);
         botoesSelecionarPanel.add(btnSelecionarElevador2);
 
         panel.add(botoesSelecionarPanel, BorderLayout.NORTH);
 
+        // Painel para os botões de chamada e andares
         JPanel botoesPanel = new JPanel(new GridLayout(6, 2, 10, 10));
         for (int i = 0; i < 6; i++) {
             final int andar = i;
@@ -79,6 +85,7 @@ public class Elevador extends JFrame {
             botoesPanel.add(botoesChamar[i % 2]);
         }
 
+        // Painel para exibir os elevadores e o display
         JPanel elevadoresPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         for (int i = 0; i < 2; i++) {
             elevadores[i] = new ElevadorPanel(i + 1);
@@ -89,6 +96,7 @@ public class Elevador extends JFrame {
         display.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(display);
 
+        // Adicionando os painéis à janela
         panel.add(botoesPanel, BorderLayout.WEST);
         panel.add(elevadoresPanel, BorderLayout.CENTER);
         panel.add(scrollPane, BorderLayout.SOUTH);
@@ -100,6 +108,7 @@ public class Elevador extends JFrame {
         setVisible(true);
     }
 
+    // Método para obter o elevador mais próximo de um determinado andar
     private int obterElevadorMaisProximo(int andar) {
         int elevadorMaisProximo = 0;
         int distanciaMinima = Math.abs(posicaoElevadores[0] - andar);
@@ -113,6 +122,7 @@ public class Elevador extends JFrame {
         return elevadorMaisProximo;
     }
 
+    // Método para mover o elevador para um determinado andar
     private void moverElevador(final int indiceElevador, final int andar) {
         new Thread(new Runnable() {
             @Override
@@ -144,6 +154,7 @@ public class Elevador extends JFrame {
         }).start();
     }
 
+    // Método principal para iniciar o programa
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -154,21 +165,25 @@ public class Elevador extends JFrame {
     }
 }
 
+// Classe que representa o painel visual de um elevador
 class ElevadorPanel extends JPanel {
     private int andarAtual;
     private int numeroElevador;
 
+    // Construtor da classe ElevadorPanel
     public ElevadorPanel(int numeroElevador) {
         this.numeroElevador = numeroElevador;
         setPreferredSize(new Dimension(150, 300));
         setBackground(Color.LIGHT_GRAY);
     }
 
+    // Método para atualizar o andar atual do elevador
     public void setAndarAtual(int andarAtual) {
         this.andarAtual = andarAtual;
         repaint();
     }
 
+    // Método para desenhar o painel do elevador
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
