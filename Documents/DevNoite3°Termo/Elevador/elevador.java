@@ -1,10 +1,15 @@
+package Elevador;
+
+
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
-// Classe principal que representa a janela do sistema de elevadores
-public class elevador extends JFrame {
+public class Elevador extends JFrame {
     private JButton[] botoesChamar;
     private JButton[] botoesAndar;
     private JTextArea display;
@@ -14,27 +19,34 @@ public class elevador extends JFrame {
     private int[] direcaoElevadores;
     private int elevadorSelecionado;
 
+    // Lista para armazenar os andares pelos quais cada elevador está passando
+    private List<List<Integer>> andaresPercorridos;
+
+    // Rótulos para mostrar o andar atual de cada elevador
+    private JLabel labelElevador1;
+    private JLabel labelElevador2;
+
     // Construtor da classe Elevador
-    public elevador() {
+    public Elevador() {
         super("Sistema de Elevadores");
 
         // Inicialização de variáveis
         botoesChamar = new JButton[2];
-        botoesAndar = new JButton[6];
+        botoesAndar = new JButton[8];
         display = new JTextArea();
         elevadores = new ElevadorPanel[2];
-        posicaoElevadores = new int[] { 0, 0 };
-        direcaoElevadores = new int[] { 0, 0 };
+        posicaoElevadores = new int[]{0, 0};
+        direcaoElevadores = new int[]{0, 0};
         elevadorSelecionado = 0;
+        andaresPercorridos = new ArrayList<>();
 
         // Configurando a interface gráfica
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-
         // Painel para os botões de chamada e andares
-        JPanel botoesPanel = new JPanel(new GridLayout(6, 2, 10, 10));
-        for (int i = 0; i < 6; i++) {
+        JPanel botoesPanel = new JPanel(new GridLayout(8, 2, 10, 10));
+        for (int i = 0; i < 8; i++) {
             final int andar = i;
             botoesAndar[i] = new JButton(String.valueOf(i));
             botoesAndar[i].addActionListener(new ActionListener() {
@@ -47,7 +59,7 @@ public class elevador extends JFrame {
             botoesPanel.add(botoesAndar[i]);
 
             botoesChamar[i % 2] = new JButton("Chamar");
-            botoesChamar[i % 2].setBackground(Color.RED);
+            botoesChamar[i % 2].setBackground(Color.BLUE);
             botoesChamar[i % 2].addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -59,20 +71,21 @@ public class elevador extends JFrame {
         }
 
         // Painel para exibir os elevadores e o display
-        JPanel elevadoresPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        JPanel elevadoresPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         for (int i = 0; i < 2; i++) {
             elevadores[i] = new ElevadorPanel(i + 1);
             elevadoresPanel.add(elevadores[i]);
         }
 
-        display.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        display.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(display);
+        // Adicionar rótulos para mostrar o andar atual de cada elevador
+        labelElevador1 = new JLabel("Andar: 0");
+        labelElevador2 = new JLabel("Andar: 0");
 
         // Adicionando os painéis à janela
         panel.add(botoesPanel, BorderLayout.WEST);
         panel.add(elevadoresPanel, BorderLayout.CENTER);
-        panel.add(scrollPane, BorderLayout.SOUTH);
+        panel.add(labelElevador1, BorderLayout.NORTH);
+        panel.add(new JScrollPane(display), BorderLayout.SOUTH);
 
         add(panel);
 
@@ -96,79 +109,91 @@ public class elevador extends JFrame {
     }
 
     // Método para mover o elevador para um determinado andar
-private void moverElevador(final int indiceElevador, final int andar) {
-    new Thread(new Runnable() {
-        @Override
-        public void run() {
-            int andarAtual = posicaoElevadores[indiceElevador];
-            int andarDestino = andar;
-            direcaoElevadores[indiceElevador] = andarAtual < andarDestino ? 1 : -1;
-
-            display.append("Elevador " + (indiceElevador + 1) + " está se movendo...\n");
-            while (andarAtual != andarDestino) {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                andarAtual += direcaoElevadores[indiceElevador];
-                posicaoElevadores[indiceElevador] = andarAtual;
-
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        elevadores[indiceElevador].setAndarAtual(andarAtual);
-                        display.append("Elevador " + (indiceElevador + 1) +
-                                " está no " + (andarAtual >= 0 ? "andar " + andarAtual : "subsolo") + "\n");
-                    }
-                });
-            }
-
-            display.append("Bem-vindo! Por favor, entre no Elevador " + (indiceElevador + 1) + "\n");
-            JOptionPane.showMessageDialog(null, "Elevador " + (indiceElevador + 1) +
-                    " chegou ao " + (andarAtual >= 0 ? "andar " + andarAtual : "subsolo"));
-        }
-    }).start();
-}
-
-    // Método principal para iniciar o programa
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
+    private void moverElevador(final int indiceElevador, final int andar) {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                new elevador();
+                int andarAtual = posicaoElevadores[indiceElevador];
+                int andarDestino = andar;
+                direcaoElevadores[indiceElevador] = andarAtual < andarDestino ? 1 : -1;
+
+                display.append("Elevador " + (indiceElevador + 1) + " está se movendo...\n");
+                List<Integer> andaresPercorridosAtual = new ArrayList<>();
+
+                while (andarAtual != andarDestino) {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    andarAtual += direcaoElevadores[indiceElevador];
+                    posicaoElevadores[indiceElevador] = andarAtual;
+
+                    andaresPercorridosAtual.add(andarAtual);
+
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            elevadores[indiceElevador].setAndarAtual(andarAtual);
+                            display.append("Elevador " + (indiceElevador + 1) +
+                                    " está no " + (andarAtual >= 0 ? "andar " + andarAtual : "subsolo") + "\n");
+
+                            // Atualizar rótulo de andar atual do elevador
+                            if (indiceElevador == 0) {
+                                labelElevador1.setText("Andar: " + andarAtual);
+                            } else if (indiceElevador == 1) {
+                                labelElevador2.setText("Andar: " + andarAtual);
+                            }
+                        }
+                    });
+                }
+
+                display.append("Bem-vindo! Por favor, entre no Elevador " + (indiceElevador + 1) + "\n");
+                JOptionPane.showMessageDialog(null, "Elevador " + (indiceElevador + 1) +
+                        " chegou ao " + (andarAtual >= 0 ? "andar " + andarAtual : "subsolo"));
+
+                // Adicionar lista de andares percorridos pelo elevador à lista global
+                andaresPercorridos.add(andaresPercorridosAtual);
             }
-        });
-    }
-}
-
-// Classe que representa o painel visual de um elevador
-class ElevadorPanel extends JPanel {
-    private int andarAtual;
-    private int numeroElevador;
-
-    // Construtor da classe ElevadorPanel
-    public ElevadorPanel(int numeroElevador) {
-        this.numeroElevador = numeroElevador;
-        setPreferredSize(new Dimension(150, 300));
-        setBackground(Color.LIGHT_GRAY);
+        }).start();
     }
 
-    // Método para atualizar o andar atual do elevador
-    public void setAndarAtual(int andarAtual) {
-        this.andarAtual = andarAtual;
-        repaint();
+    public static void main(String[] args) {
+        // Exibir JOptionPane de boas-vindas
+        JOptionPane.showMessageDialog(null, "Bem-vindo ao elevador!");
+
+        // Criar e iniciar o elevador
+        SwingUtilities.invokeLater(() -> new Elevador());
     }
 
-    // Método para desenhar o painel do elevador
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        g.setColor(Color.WHITE);
-        g.fillRect(30, 50, 90, 200);
-        g.setColor(Color.BLACK);
-        g.drawRect(30, 50, 90, 200);
-        g.drawString("Elevador " + numeroElevador, 40, 30);
-        g.drawString("Andar: " + andarAtual, 40, 270);
+    // Classe que representa o painel visual de um elevador
+    class ElevadorPanel extends JPanel {
+        private int andarAtual;
+        private int numeroElevador;
+
+        // Construtor da classe ElevadorPanel
+        public ElevadorPanel(int numeroElevador) {
+            this.numeroElevador = numeroElevador;
+            setPreferredSize(new Dimension(150, 300));
+            setBackground(Color.LIGHT_GRAY);
+        }
+
+        // Método para atualizar o andar atual do elevador
+        public void setAndarAtual(int andarAtual) {
+            this.andarAtual = andarAtual;
+            repaint();
+        }
+
+        // Método para desenhar o painel do elevador
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.setColor(Color.WHITE);
+            g.fillRect(30, 50, 90, 200);
+            g.setColor(Color.BLACK);
+            g.drawRect(30, 50, 90, 200);
+            g.drawString("Elevador " + numeroElevador, 40, 30);
+            g.drawString("Andar: " + andarAtual, 40, 270);
+        }
     }
 }
