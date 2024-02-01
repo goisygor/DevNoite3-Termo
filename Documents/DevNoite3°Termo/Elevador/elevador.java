@@ -4,11 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 // Classe principal que representa a janela do sistema de elevadores
-public class Elevador extends JFrame {
+public class elevador extends JFrame {
     private JButton[] botoesChamar;
     private JButton[] botoesAndar;
-    private JButton btnSelecionarElevador1;
-    private JButton btnSelecionarElevador2;
     private JTextArea display;
     private ElevadorPanel[] elevadores;
 
@@ -17,7 +15,7 @@ public class Elevador extends JFrame {
     private int elevadorSelecionado;
 
     // Construtor da classe Elevador
-    public Elevador() {
+    public elevador() {
         super("Sistema de Elevadores");
 
         // Inicialização de variáveis
@@ -25,39 +23,14 @@ public class Elevador extends JFrame {
         botoesAndar = new JButton[6];
         display = new JTextArea();
         elevadores = new ElevadorPanel[2];
-        posicaoElevadores = new int[]{0, 0};
-        direcaoElevadores = new int[]{0, 0};
+        posicaoElevadores = new int[] { 0, 0 };
+        direcaoElevadores = new int[] { 0, 0 };
         elevadorSelecionado = 0;
 
         // Configurando a interface gráfica
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Botões para selecionar o elevador
-        btnSelecionarElevador1 = new JButton("Selecionar Elevador 1");
-        btnSelecionarElevador1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                elevadorSelecionado = 0;
-                JOptionPane.showMessageDialog(null, "Elevador 1 selecionado");
-            }
-        });
-
-        btnSelecionarElevador2 = new JButton("Selecionar Elevador 2");
-        btnSelecionarElevador2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                elevadorSelecionado = 1;
-                JOptionPane.showMessageDialog(null, "Elevador 2 selecionado");
-            }
-        });
-
-        // Painel para os botões de seleção de elevador
-        JPanel botoesSelecionarPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        botoesSelecionarPanel.add(btnSelecionarElevador1);
-        botoesSelecionarPanel.add(btnSelecionarElevador2);
-
-        panel.add(botoesSelecionarPanel, BorderLayout.NORTH);
 
         // Painel para os botões de chamada e andares
         JPanel botoesPanel = new JPanel(new GridLayout(6, 2, 10, 10));
@@ -123,43 +96,47 @@ public class Elevador extends JFrame {
     }
 
     // Método para mover o elevador para um determinado andar
-    private void moverElevador(final int indiceElevador, final int andar) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int andarAtual = posicaoElevadores[indiceElevador];
-                int andarDestino = andar;
-                direcaoElevadores[indiceElevador] = andarAtual < andarDestino ? 1 : -1;
+private void moverElevador(final int indiceElevador, final int andar) {
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            int andarAtual = posicaoElevadores[indiceElevador];
+            int andarDestino = andar;
+            direcaoElevadores[indiceElevador] = andarAtual < andarDestino ? 1 : -1;
 
-                display.append("Elevador " + (indiceElevador + 1) + " está se movendo...\n");
-                while (andarAtual != andarDestino) {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    andarAtual += direcaoElevadores[indiceElevador];
-                    posicaoElevadores[indiceElevador] = andarAtual;
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            elevadores[indiceElevador].setAndarAtual(andarAtual);
-                            display.setText(display.getText() + "Elevador " + (indiceElevador + 1) +
-                                    " chegou ao " + (andarAtual >= 0 ? "andar " + andarAtual : "subsolo") + "\n");
-                        }
-                    });
+            display.append("Elevador " + (indiceElevador + 1) + " está se movendo...\n");
+            while (andarAtual != andarDestino) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                display.append("Bem-vindo! Por favor, entre no Elevador " + (indiceElevador + 1) + "\n");
+                andarAtual += direcaoElevadores[indiceElevador];
+                posicaoElevadores[indiceElevador] = andarAtual;
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        elevadores[indiceElevador].setAndarAtual(andarAtual);
+                        display.append("Elevador " + (indiceElevador + 1) +
+                                " está no " + (andarAtual >= 0 ? "andar " + andarAtual : "subsolo") + "\n");
+                    }
+                });
             }
-        }).start();
-    }
+
+            display.append("Bem-vindo! Por favor, entre no Elevador " + (indiceElevador + 1) + "\n");
+            JOptionPane.showMessageDialog(null, "Elevador " + (indiceElevador + 1) +
+                    " chegou ao " + (andarAtual >= 0 ? "andar " + andarAtual : "subsolo"));
+        }
+    }).start();
+}
 
     // Método principal para iniciar o programa
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new Elevador();
+                new elevador();
             }
         });
     }
