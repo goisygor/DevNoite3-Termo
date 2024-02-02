@@ -1,7 +1,5 @@
 package Elevador;
 
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,14 +7,24 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Elevador extends JFrame {
+// A classe 'elevador' estende JFrame, indicando que é uma janela gráfica.
+public class elevador extends JFrame {
+
+    // Botões para chamar os elevadores e para selecionar o andar desejado.
     private JButton[] botoesChamar;
     private JButton[] botoesAndar;
+
+    // Área de exibição para mostrar informações sobre o elevador.
     private JTextArea display;
+
+    // Painéis representando cada elevador na interface gráfica.
     private ElevadorPanel[] elevadores;
 
+    // Arrays para armazenar a posição e a direção de cada elevador.
     private int[] posicaoElevadores;
     private int[] direcaoElevadores;
+
+    // Índice do elevador atualmente selecionado.
     private int elevadorSelecionado;
 
     // Lista para armazenar os andares pelos quais cada elevador está passando
@@ -27,17 +35,19 @@ public class Elevador extends JFrame {
     private JLabel labelElevador2;
 
     // Construtor da classe Elevador
-    public Elevador() {
+    public elevador() {
         super("Sistema de Elevadores");
 
-        // Inicialização de variáveis
+        // Inicialização de variáveis para os botões de chamada dos elevadores.
         botoesChamar = new JButton[2];
-        botoesAndar = new JButton[8];
-        display = new JTextArea();
-        elevadores = new ElevadorPanel[2];
-        posicaoElevadores = new int[]{0, 0};
-        direcaoElevadores = new int[]{0, 0};
-        elevadorSelecionado = 0;
+        botoesAndar = new JButton[10]; // Ajustar para 9 botões para incluir os andares -2 a 6
+        display = new JTextArea();// Inicialização da área de exibição de informações sobre o elevador.
+        elevadores = new ElevadorPanel[2];// Inicialização dos painéis que representarão visualmente cada elevador na interface gráfica.
+        posicaoElevadores = new int[]{0, 0};// Inicialização das posições iniciais dos elevadores (0 representa o térreo).
+        direcaoElevadores = new int[]{0, 0};// Inicialização das direções iniciais dos elevadores (0 para parado, -2 para descendo, 1 para subindo).
+        elevadorSelecionado = 0; // Inicialização do índice do elevador atualmente selecionado (pode ser usado para interação do usuário).
+
+        // Inicialização de uma lista para armazenar os andares pelos quais os elevadores passaram.
         andaresPercorridos = new ArrayList<>();
 
         // Configurando a interface gráfica
@@ -45,29 +55,31 @@ public class Elevador extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Painel para os botões de chamada e andares
-        JPanel botoesPanel = new JPanel(new GridLayout(8, 2, 10, 10));
-        for (int i = 0; i < 8; i++) {
+        JPanel botoesPanel = new JPanel(new GridLayout(10, 2, 10, 10)); // Ajustar para 9 botões
+        for (int i = -2; i <= 6; i++) {
             final int andar = i;
-            botoesAndar[i] = new JButton(String.valueOf(i));
-            botoesAndar[i].addActionListener(new ActionListener() {
+            botoesAndar[i + 2] = new JButton(String.valueOf(andar));
+            botoesAndar[i + 2].addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     int andarSolicitado = Integer.parseInt(((JButton) e.getSource()).getText());
                     moverElevador(elevadorSelecionado, andarSolicitado);
                 }
             });
-            botoesPanel.add(botoesAndar[i]);
+            botoesPanel.add(botoesAndar[i + 2]);
 
-            botoesChamar[i % 2] = new JButton("Chamar");
-            botoesChamar[i % 2].setBackground(Color.BLUE);
-            botoesChamar[i % 2].addActionListener(new ActionListener() {
+            botoesChamar[(i + 2) % 2] = new JButton("Chamar");// Criação de botões de chamada de elevador, alternando entre dois índices para diferentes andares.
+            botoesChamar[(i + 2) % 2].setBackground(Color.BLUE); // Configuração da cor de fundo dos botões de chamada para azul.
+
+            // Adicionando um ouvinte de ação aos botões de chamada.
+            botoesChamar[(i + 2) % 2].addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     int elevadorMaisProximo = obterElevadorMaisProximo(andar);
                     moverElevador(elevadorMaisProximo, andar);
                 }
             });
-            botoesPanel.add(botoesChamar[i % 2]);
+            botoesPanel.add(botoesChamar[(i + 2) % 2]);
         }
 
         // Painel para exibir os elevadores e o display
@@ -81,11 +93,10 @@ public class Elevador extends JFrame {
         labelElevador1 = new JLabel("Andar: 0");
         labelElevador2 = new JLabel("Andar: 0");
 
-        // Adicionando os painéis à janela
-        panel.add(botoesPanel, BorderLayout.WEST);
-        panel.add(elevadoresPanel, BorderLayout.CENTER);
-        panel.add(labelElevador1, BorderLayout.NORTH);
-        panel.add(new JScrollPane(display), BorderLayout.SOUTH);
+        panel.add(botoesPanel, BorderLayout.WEST);// Adicionando o painel de botões de chamada e seleção de andar à parte esquerda da janela.
+        panel.add(elevadoresPanel, BorderLayout.CENTER);// Adicionando os painéis representando visualmente os elevadores ao centro da janela.
+        panel.add(labelElevador1, BorderLayout.NORTH);// Adicionando um rótulo (labelElevador1) acima da janela, talvez indicando informações sobre o elevador.
+        panel.add(new JScrollPane(display), BorderLayout.SOUTH);// Adicionando uma área de exibição (display) com barra de rolagem à parte inferior da janela.
 
         add(panel);
 
@@ -163,7 +174,7 @@ public class Elevador extends JFrame {
         JOptionPane.showMessageDialog(null, "Bem-vindo ao elevador!");
 
         // Criar e iniciar o elevador
-        SwingUtilities.invokeLater(() -> new Elevador());
+        SwingUtilities.invokeLater(() -> new elevador());
     }
 
     // Classe que representa o painel visual de um elevador
@@ -178,7 +189,7 @@ public class Elevador extends JFrame {
             setBackground(Color.LIGHT_GRAY);
         }
 
-        // Método para atualizar o andar atual do elevador
+        /*  Método para atualizar o andar atual do elevador
         public void setAndarAtual(int andarAtual) {
             this.andarAtual = andarAtual;
             repaint();
@@ -193,7 +204,7 @@ public class Elevador extends JFrame {
             g.setColor(Color.BLACK);
             g.drawRect(30, 50, 90, 200);
             g.drawString("Elevador " + numeroElevador, 40, 30);
-            g.drawString("Andar: " + andarAtual, 40, 270);
+            g.drawString("Andar: " + andarAtual, 40, 270);*/
         }
     }
-}
+
